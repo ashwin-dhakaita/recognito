@@ -39,6 +39,7 @@ import com.bitsinharmony.recognito.enhancements.Normalizer;
 import com.bitsinharmony.recognito.features.FeaturesExtractor;
 import com.bitsinharmony.recognito.features.LpcFeaturesExtractor;
 import com.bitsinharmony.recognito.utils.FileHelper;
+import com.bitsinharmony.recognito.utils.Recorder;
 import com.bitsinharmony.recognito.vad.AutocorrellatedVoiceActivityDetector;
 
 /**
@@ -362,5 +363,40 @@ public class Recognito<K> {
         double[] lpcFeatures = lpcExtractor.extractFeatures(voiceSample);
 
         return lpcFeatures;
+    }
+
+    public File getMicInput(String fileName, long timeDelay){
+    
+        /**
+        * timeDelay: the time duration of recording and should be in milliseconds 
+        * fileName: the name of the output file
+        */
+
+        Recorder recorder = new Recorder(fileName, this.sampleRate);
+
+        /**
+        *  creates a new thread that waits for a specified
+        *  of time before stopping
+        */
+
+        Thread record = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    recorder.start();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        
+        // start recording
+        record.start();
+        try {
+            Thread.sleep(timeDelay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        recorder.finish();
+        return new File(fileName);
     }
 }
